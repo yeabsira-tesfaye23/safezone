@@ -1,0 +1,29 @@
+{
+  "name": "safezone-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "SafeZone API: privacy-preserving geofencing and emergency alerts",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/migrate.js",
+    "seed": "node src/seed.js",
+    "retention": "node src/jobs/retention.js",
+    "test": "node --env-file-if-exists=.env.test --test --test-concurrency=1 tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=20.6"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  }
+}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="theme-color" content="#0f5c58" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>SafeZone</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript><p style="font:16px system-ui;padding:2rem">SafeZone needs JavaScript. Please enable it in your browser.</p></noscript>
+    <script>
+      // Opening this file by double-click (file://) cannot work: browsers block the app's scripts.
+      if (location.protocol === 'file:') {
+        document.getElementById('root').innerHTML = '<div style="font:16px/1.5 system-ui;max-width:560px;margin:4rem auto;padding:0 1rem"><h1>Start SafeZone with its server</h1><p>This page cannot be opened by double-clicking the file. Double-click <b>start.bat</b> in the SafeZone folder (or run <code>npm start</code> in the backend folder), then open <b>http://localhost:4000</b>.</p></div>';
+      }
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

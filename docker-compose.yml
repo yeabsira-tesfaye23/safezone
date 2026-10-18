@@ -1,0 +1,12 @@
+# Optional: run PostgreSQL in Docker instead of installing it.  docker compose up -d
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: safezone
+      POSTGRES_PASSWORD: safezone_dev
+      POSTGRES_DB: safezone
+    ports: ["5432:5432"]
+    volumes: ["safezone-data:/var/lib/postgresql/data"]
+volumes:
+  safezone-data:
