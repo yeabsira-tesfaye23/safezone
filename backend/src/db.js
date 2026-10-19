@@ -63,7 +63,7 @@ function createEmbeddedPool() {
 }
 
 export const pool = config.databaseUrl
-  ? new pg.Pool({ connectionString: config.databaseUrl, max: 10 })
+  ? new pg.Pool({ connectionString: config.databaseUrl, max: 10, idleTimeoutMillis: 10000, connectionTimeoutMillis: 20000 })
   : createEmbeddedPool();
 
 pool.on('error', (err) => {
