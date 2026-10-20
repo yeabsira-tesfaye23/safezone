@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { post } from '../lib/api.js';
-import { Banner, Field, useAction, usePageTitle } from '../components/ui.jsx';
+import { Banner, Field, useAction, usePageTitle, PasswordInput } from '../components/ui.jsx';
 
 export default function Register() {
   usePageTitle('Create account');
@@ -53,7 +53,7 @@ export default function Register() {
         {child && (
           <Field label="Date of birth" id="dob" hint="We use this only to check that a young person's account is for someone under 18."><input id="dob" type="date" required value={form.dateOfBirth} onChange={set('dateOfBirth')} /></Field>
         )}
-        <Field label="Password" id="password" hint="At least 8 characters, with a capital letter, a number and a special character (for example ! @ # $)."><input id="password" type="password" autoComplete="new-password" required minLength={8} value={form.password} onChange={set('password')} /></Field>
+        <Field label="Password" id="password" hint="At least 8 characters, with a capital letter, a number and a special character (for example ! @ # $)."><PasswordInput id="password" autoComplete="new-password" required minLength={8} value={form.password} onChange={set('password')} /></Field>
         <div className="note" style={{ marginBottom: '1rem' }}>
           <p><strong>{child ? 'What you should know' : 'Privacy notice'}</strong></p>
           <ul className="small" style={{ margin: 0, paddingLeft: '1.2rem' }}>

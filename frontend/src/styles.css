@@ -112,3 +112,9 @@ th { background: #eef1f4; }
 .stat { font-size: 2rem; font-weight: 800; }
 dialog { border: 2px solid var(--ink); border-radius: var(--radius); max-width: min(640px, 94vw); width: 100%; padding: 1.25rem; }
 dialog::backdrop { background: rgba(0, 0, 0, .5); }
+
+/* Show/hide button inside password boxes */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 2.75rem; }
+.pw-toggle { position: absolute; right: .25rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted, #555); min-height: 0; padding: .4rem; display: inline-flex; align-items: center; cursor: pointer; border-radius: 6px; }
+.pw-toggle:hover { color: var(--primary); background: none; }

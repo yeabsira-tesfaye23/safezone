@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { post } from '../lib/api.js';
-import { Banner, Field, useAction, usePageTitle } from '../components/ui.jsx';
+import { Banner, Field, useAction, usePageTitle, PasswordInput } from '../components/ui.jsx';
 
 export default function Login() {
   usePageTitle('Sign in');
@@ -29,7 +29,7 @@ export default function Login() {
         )}
         <div style={{ height: '.75rem' }} />
         <Field label="Email" id="email"><input id="email" type="email" autoComplete="username" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-        <Field label="Password" id="password"><input id="password" type="password" autoComplete="current-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></Field>
+        <Field label="Password" id="password"><PasswordInput id="password" autoComplete="current-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></Field>
         <button type="submit" disabled={busy} style={{ width: '100%' }}>{busy ? 'Signing in…' : 'Sign in'}</button>
         <p className="center small" style={{ marginTop: '1rem' }}><Link to="/forgot-password">Forgot your password?</Link></p>
       </form>

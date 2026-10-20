@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
-import { Banner, ErrorNote, Field, Loading, Pill, useAction, useAsync, usePageTitle } from '../components/ui.jsx';
+import { Banner, ErrorNote, Field, Loading, Pill, useAction, useAsync, usePageTitle, PasswordInput } from '../components/ui.jsx';
 import { del, get, post } from '../lib/api.js';
 
 export default function Account() {
@@ -46,8 +46,8 @@ export default function Account() {
         <form onSubmit={(e) => { e.preventDefault(); pw.run(async () => { await post('/me/change-password', form); setChanged(true); setTimeout(() => { endSession(); navigate('/login'); }, 1500); }); }}>
           <ErrorNote error={pw.error} />
           {changed && <Banner kind="ok" live>Password changed. All sessions were signed out. Redirecting to sign in…</Banner>}
-          <Field label="Current password" id="cp"><input id="cp" type="password" autoComplete="current-password" required value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} /></Field>
-          <Field label="New password" id="np" hint="At least 8 characters, with a capital letter, a number and a special character (for example ! @ # $)."><input id="np" type="password" autoComplete="new-password" required minLength={8} value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} /></Field>
+          <Field label="Current password" id="cp"><PasswordInput id="cp" autoComplete="current-password" required value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} /></Field>
+          <Field label="New password" id="np" hint="At least 8 characters, with a capital letter, a number and a special character (for example ! @ # $)."><PasswordInput id="np" autoComplete="new-password" required minLength={8} value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} /></Field>
           <button type="submit" disabled={pw.busy}>Change password</button>
         </form>
       </section>
@@ -59,7 +59,7 @@ export default function Account() {
           <form onSubmit={(e) => { e.preventDefault(); wipe.run(async () => { const r = await del('/me/data', { password: wipePw }); setWiped(r.deleted); setWipePw(''); }); }}>
             <ErrorNote error={wipe.error} />
             {wiped && <Banner kind="ok" live title="Deleted:">{Object.entries(wiped).map(([k, v]) => `${k}: ${v}`).join(' · ')}</Banner>}
-            <Field label="Confirm with your password" id="wp"><input id="wp" type="password" autoComplete="current-password" required value={wipePw} onChange={(e) => setWipePw(e.target.value)} /></Field>
+            <Field label="Confirm with your password" id="wp"><PasswordInput id="wp" autoComplete="current-password" required value={wipePw} onChange={(e) => setWipePw(e.target.value)} /></Field>
             <button type="submit" className="danger outline" disabled={wipe.busy}>Delete my data</button>
           </form>
         </section>
@@ -70,7 +70,7 @@ export default function Account() {
         <p>You will be signed out everywhere, all connections end, and your personal details are removed after 30 days.</p>
         <form onSubmit={(e) => { e.preventDefault(); if (!window.confirm('Deactivate your account?')) return; dead.run(async () => { await post('/me/deactivate', { password: deactPw }); endSession(); navigate('/login'); }); }}>
           <ErrorNote error={dead.error} />
-          <Field label="Confirm with your password" id="dp"><input id="dp" type="password" autoComplete="current-password" required value={deactPw} onChange={(e) => setDeactPw(e.target.value)} /></Field>
+          <Field label="Confirm with your password" id="dp"><PasswordInput id="dp" autoComplete="current-password" required value={deactPw} onChange={(e) => setDeactPw(e.target.value)} /></Field>
           <button type="submit" className="danger" disabled={dead.busy}>Deactivate my account</button>
         </form>
       </section>
