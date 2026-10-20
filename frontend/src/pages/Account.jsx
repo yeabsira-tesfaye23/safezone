@@ -47,7 +47,7 @@ export default function Account() {
           <ErrorNote error={pw.error} />
           {changed && <Banner kind="ok" live>Password changed. All sessions were signed out. Redirecting to sign in…</Banner>}
           <Field label="Current password" id="cp"><input id="cp" type="password" autoComplete="current-password" required value={form.currentPassword} onChange={(e) => setForm({ ...form, currentPassword: e.target.value })} /></Field>
-          <Field label="New password" id="np" hint="At least 10 characters."><input id="np" type="password" autoComplete="new-password" required minLength={10} value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} /></Field>
+          <Field label="New password" id="np" hint="At least 8 characters, with a capital letter, a number and a special character (for example ! @ # $)."><input id="np" type="password" autoComplete="new-password" required minLength={8} value={form.newPassword} onChange={(e) => setForm({ ...form, newPassword: e.target.value })} /></Field>
           <button type="submit" disabled={pw.busy}>Change password</button>
         </form>
       </section>

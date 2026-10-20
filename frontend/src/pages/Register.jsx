@@ -53,7 +53,7 @@ export default function Register() {
         {child && (
           <Field label="Date of birth" id="dob" hint="We use this only to check that a young person's account is for someone under 18."><input id="dob" type="date" required value={form.dateOfBirth} onChange={set('dateOfBirth')} /></Field>
         )}
-        <Field label="Password" id="password" hint="At least 10 characters. A few random words is a good password."><input id="password" type="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={set('password')} /></Field>
+        <Field label="Password" id="password" hint="At least 8 characters, with a capital letter, a number and a special character (for example ! @ # $)."><input id="password" type="password" autoComplete="new-password" required minLength={8} value={form.password} onChange={set('password')} /></Field>
         <div className="note" style={{ marginBottom: '1rem' }}>
           <p><strong>{child ? 'What you should know' : 'Privacy notice'}</strong></p>
           <ul className="small" style={{ margin: 0, paddingLeft: '1.2rem' }}>

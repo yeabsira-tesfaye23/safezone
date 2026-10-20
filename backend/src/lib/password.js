@@ -3,10 +3,15 @@ import { badRequest } from './errors.js';
 
 const COMMON = new Set(['password123', 'password1234', '1234567890', 'qwertyuiop', 'iloveyou123', 'letmein1234', 'safezone1234']);
 
-// Policy: at least 10 characters, not a well-known password, and not mostly one repeated character.
+// Policy: at least 8 characters with an uppercase letter, a lowercase letter, a number and a special
+// character; not a well-known password; not mostly one repeated character.
 export function checkPasswordPolicy(password, { email = '', name = '' } = {}) {
-  if (typeof password !== 'string' || password.length < 10) throw badRequest('password: must be at least 10 characters', 'weak_password');
+  if (typeof password !== 'string' || password.length < 8) throw badRequest('password: must be at least 8 characters', 'weak_password');
   if (password.length > 128) throw badRequest('password: must be at most 128 characters', 'weak_password');
+  if (!/[A-Z]/.test(password)) throw badRequest('password: must include at least one capital letter', 'weak_password');
+  if (!/[a-z]/.test(password)) throw badRequest('password: must include at least one lowercase letter', 'weak_password');
+  if (!/[0-9]/.test(password)) throw badRequest('password: must include at least one number', 'weak_password');
+  if (!/[^A-Za-z0-9]/.test(password)) throw badRequest('password: must include at least one special character, such as ! @ # $ %', 'weak_password');
   const lower = password.toLowerCase();
   if (COMMON.has(lower)) throw badRequest('password: too common, choose something less guessable', 'weak_password');
   if (new Set(lower).size < 5) throw badRequest('password: too repetitive', 'weak_password');
