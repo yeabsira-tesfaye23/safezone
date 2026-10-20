@@ -32,6 +32,13 @@ export const config = {
   authRateLimit: num('AUTH_RATE_LIMIT', env === 'test' ? 10000 : 30), // per 15 minutes per IP
   apiRateLimit: num('API_RATE_LIMIT', env === 'test' ? 100000 : 600), // per minute per IP
 
+  // Email: verification links and password-reset links are sent through the Brevo HTTPS API
+  // (free hosting plans block SMTP). Without BREVO_API_KEY mail is only printed to the console.
+  requireEmailVerification: bool('REQUIRE_EMAIL_VERIFICATION', false),
+  brevoApiKey: process.env.BREVO_API_KEY || '',
+  mailFrom: process.env.MAIL_FROM || '',
+  mailFromName: process.env.MAIL_FROM_NAME || 'SafeZone',
+
   // Guardian accounts: when true, an administrator must verify a guardian before links can activate.
   requireGuardianVerification: bool('REQUIRE_GUARDIAN_VERIFICATION', false),
 
@@ -56,11 +63,18 @@ export const config = {
   runRetentionOnStart: bool('RUN_RETENTION_ON_START', env !== 'test'),
 };
 
+if (config.isProd && !process.env.FRONTEND_ORIGIN) {
+  console.warn('[config] FRONTEND_ORIGIN is not set; links in emails will point to ' + config.frontendOrigin);
+}
+
 if (config.isProd) {
   const weak = [];
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) weak.push('JWT_SECRET (min 32 chars)');
   if (!process.env.REPORT_ENCRYPTION_KEY || !/^[0-9a-fA-F]{64}$/.test(process.env.REPORT_ENCRYPTION_KEY)) {
     weak.push('REPORT_ENCRYPTION_KEY (64 hex chars)');
+  }
+  if (config.requireEmailVerification && (!config.brevoApiKey || !config.mailFrom)) {
+    weak.push('BREVO_API_KEY and MAIL_FROM (needed when REQUIRE_EMAIL_VERIFICATION=true)');
   }
   if (weak.length) {
     throw new Error(`Refusing to start in production without: ${weak.join(', ')}`);

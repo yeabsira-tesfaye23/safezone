@@ -24,6 +24,7 @@ export function AuthProvider({ children }) {
     },
     async register(form) {
       const data = await post('/auth/register', form);
+      if (data.needsVerification) return data; // account created; the person must confirm their email first
       setAccessToken(data.accessToken); setUser(data.user); return data.user;
     },
     async logout() { try { await post('/auth/logout'); } finally { endSession(); } },

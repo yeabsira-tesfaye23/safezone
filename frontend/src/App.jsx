@@ -17,6 +17,7 @@ import { ForgotPassword, ResetPassword } from './pages/Recovery.jsx';
 import Register from './pages/Register.jsx';
 import Report from './pages/Report.jsx';
 import Sos from './pages/Sos.jsx';
+import VerifyEmail from './pages/VerifyEmail.jsx';
 
 function Guard({ roles, children }) {
   const { user } = useAuth();
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/privacy" element={<PrivacyNotice />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
@@ -49,6 +51,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/privacy" element={<PrivacyNotice />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="zones" element={<Guard roles={['child', 'guardian']}><Zones /></Guard>} />

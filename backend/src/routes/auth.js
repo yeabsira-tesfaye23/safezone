@@ -30,6 +30,7 @@ const publicUser = (u) => ({
   email: u.email,
   fullName: u.full_name,
   guardianVerified: u.guardian_verified,
+  emailVerified: Boolean(u.email_verified_at),
   dateOfBirth: u.date_of_birth,
 });
 
@@ -65,6 +66,22 @@ async function recordDevice(req, user) {
     });
   }
   return hash;
+}
+
+// Email verification: proves the person owns the address. Only the SHA-256 of the token is stored.
+async function sendVerificationEmail(user) {
+  await query('UPDATE email_verifications SET used_at = now() WHERE user_id = $1 AND used_at IS NULL', [user.id]);
+  const token = randomToken(32);
+  await query(
+    `INSERT INTO email_verifications (user_id, token_hash, expires_at) VALUES ($1, $2, now() + interval '24 hours')`,
+    [user.id, sha256(token)],
+  );
+  const link = `${config.frontendOrigin}/verify-email?token=${token}`;
+  return sendMail({
+    to: user.email,
+    subject: 'Confirm your SafeZone email',
+    text: `Hello ${user.full_name},\n\nConfirm your email address to activate your SafeZone account (the link works for 24 hours):\n${link}\n\nIf you did not create this account, you can ignore this message.`,
+  });
 }
 
 const registerSchema = z.object({
@@ -104,6 +121,11 @@ router.post('/register', wrap(async (req, res) => {
   if (user.role === 'child') await query('INSERT INTO sharing_settings (child_id) VALUES ($1) ON CONFLICT DO NOTHING', [user.id]);
   req.user = user;
   await audit(req, 'auth.register', { targetType: 'user', targetId: user.id, meta: { role: user.role } });
+  if (config.requireEmailVerification) {
+    // No session until the address is confirmed.
+    await sendVerificationEmail(user);
+    return res.status(201).json({ needsVerification: true, email: user.email });
+  }
   const deviceHash = await recordDevice(req, user);
   const refresh = await issueRefreshToken(user.id, deviceHash);
   setRefreshCookie(res, refresh);
@@ -138,6 +160,9 @@ router.post('/login', wrap(async (req, res) => {
     throw generic;
   }
   if (user.status !== 'active') throw forbidden('This account is not active', 'account_inactive');
+  if (config.requireEmailVerification && user.role !== 'admin' && !user.email_verified_at) {
+    throw forbidden('Please confirm your email first. Open the link we sent you, or ask for a new one.', 'email_not_verified');
+  }
   await query('UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = $1', [user.id]);
   req.user = user;
   await audit(req, 'auth.login', { targetType: 'user', targetId: user.id });
@@ -178,6 +203,30 @@ router.post('/logout', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
+router.post('/verify-email', wrap(async (req, res) => {
+  const { token } = parse(z.object({ token: z.string().min(20).max(200) }), req.body);
+  const { rows } = await query(
+    `SELECT v.id, v.user_id FROM email_verifications v JOIN users u ON u.id = v.user_id
+     WHERE v.token_hash = $1 AND v.used_at IS NULL AND v.expires_at > now() AND u.status = 'active'`,
+    [sha256(token)],
+  );
+  const row = rows[0];
+  if (!row) throw badRequest('This confirmation link is invalid or has expired. Ask for a new one.', 'bad_verify_token');
+  await query('UPDATE email_verifications SET used_at = now() WHERE id = $1', [row.id]);
+  await query('UPDATE users SET email_verified_at = COALESCE(email_verified_at, now()), updated_at = now() WHERE id = $1', [row.user_id]);
+  req.user = { id: row.user_id, role: null };
+  await audit(req, 'auth.email_verified', { targetType: 'user', targetId: row.user_id });
+  res.json({ ok: true });
+}));
+
+// Same answer whether or not the address is registered, so emails cannot be probed.
+router.post('/resend-verification', wrap(async (req, res) => {
+  const { email } = parse(z.object({ email: z.string().trim().toLowerCase().email().max(200) }), req.body);
+  const { rows } = await query("SELECT * FROM users WHERE lower(email) = $1 AND status = 'active' AND email_verified_at IS NULL", [email]);
+  if (rows[0]) await sendVerificationEmail(rows[0]);
+  res.json({ ok: true, message: 'If that account is waiting for confirmation, a new link has been sent.' });
+}));
+
 // Account recovery. The response is always the same so attackers cannot discover which emails are registered.
 router.post('/forgot-password', wrap(async (req, res) => {
   const { email } = parse(z.object({ email: z.string().trim().toLowerCase().email().max(200) }), req.body);
@@ -211,7 +260,7 @@ router.post('/reset-password', wrap(async (req, res) => {
   const hash = await hashPassword(newPassword);
   await withTransaction(async (c) => {
     await c.query('UPDATE password_resets SET used_at = now() WHERE id = $1', [row.id]);
-    await c.query('UPDATE users SET password_hash = $2, failed_attempts = 0, locked_until = NULL, updated_at = now() WHERE id = $1', [row.user_id, hash]);
+    await c.query('UPDATE users SET password_hash = $2, failed_attempts = 0, locked_until = NULL, email_verified_at = COALESCE(email_verified_at, now()), updated_at = now() WHERE id = $1', [row.user_id, hash]);
     await c.query('UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL', [row.user_id]);
   });
   await notify({ recipientId: row.user_id, kind: 'system', title: 'Password changed', body: 'Your password was reset. If this was not you, contact an administrator.', dedupeKey: `pwreset:${row.id}` });

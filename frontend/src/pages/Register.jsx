@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
+import { post } from '../lib/api.js';
 import { Banner, Field, useAction, usePageTitle } from '../components/ui.jsx';
 
 export default function Register() {
@@ -8,6 +9,8 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const { busy, error, run } = useAction();
+  const [pending, setPending] = useState(null); // email awaiting confirmation
+  const [resent, setResent] = useState(false);
   const [form, setForm] = useState({ role: 'guardian', fullName: '', email: '', password: '', dateOfBirth: '', accepted: false });
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
@@ -15,9 +18,26 @@ export default function Register() {
     e.preventDefault();
     const body = { role: form.role, fullName: form.fullName, email: form.email, password: form.password, acceptedPrivacyNotice: form.accepted };
     if (form.role === 'child') body.dateOfBirth = form.dateOfBirth;
-    run(async () => { await register(body); navigate('/'); });
+    run(async () => {
+      const result = await register(body);
+      if (result?.needsVerification) setPending(result.email); else navigate('/');
+    });
   };
   const child = form.role === 'child';
+  if (pending) {
+    return (
+      <div className="auth-wrap">
+        <h1>Check your email</h1>
+        <div className="card">
+          <p>We sent a confirmation link to <strong>{pending}</strong>. Open it to activate your account, then sign in.</p>
+          <p className="small muted">It can take a minute. Look in your spam folder too. If the address was typed wrong, no account can be activated; register again with the correct one.</p>
+          {resent && <Banner kind="ok" live>If that account is waiting for confirmation, a new link has been sent.</Banner>}
+          <button type="button" className="secondary" onClick={() => post('/auth/resend-verification', { email: pending }).then(() => setResent(true)).catch(() => {})}>Send the link again</button>
+        </div>
+        <p className="center"><Link to="/login">Go to sign in</Link></p>
+      </div>
+    );
+  }
   return (
     <div className="auth-wrap">
       <h1>Create your account</h1>
