@@ -110,7 +110,7 @@ export default function Sos() {
         <div className="center">
           {phase === 'idle'
             ? <button className="sos-button" onClick={startCountdown} aria-label="Send SOS emergency alert">SOS<small>Tap to send</small></button>
-            : <button className="sos-button" onClick={cancel} style={{ background: '#fff', color: 'var(--danger)', borderColor: 'var(--danger)' }}>CANCEL<small>Tap to stop</small></button>}
+            : <button className="sos-button" onClick={cancel} style={{ background: 'var(--surface)', color: 'var(--danger)', borderColor: 'var(--danger)' }}>CANCEL<small>Tap to stop</small></button>}
           {phase === 'countdown' && <p><button className="link" onClick={send}>Send now without waiting</button></p>}
         </div>
       )}

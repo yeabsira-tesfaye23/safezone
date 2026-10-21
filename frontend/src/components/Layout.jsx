@@ -4,7 +4,7 @@ import { useAuth } from '../auth.jsx';
 import { get } from '../lib/api.js';
 import { flushQueue } from '../lib/sosQueue.js';
 import { GeofenceProvider } from './Geofence.jsx';
-import { useInterval } from './ui.jsx';
+import { ThemeToggle, useInterval } from './ui.jsx';
 
 const NAV = {
   child: [['/', 'Home'], ['/sos', 'SOS'], ['/zones', 'My zones'], ['/report', 'Report a problem'], ['/notifications', 'Alerts'], ['/privacy-settings', 'Privacy & permissions']],
@@ -63,6 +63,7 @@ export default function Layout() {
             ))}
           </nav>
           <div className="who">
+            <ThemeToggle />
             <span>{user.fullName} ({user.role})</span>
             <button className="secondary small" onClick={async () => { await logout(); navigate('/login'); }}>Sign out</button>
           </div>

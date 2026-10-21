@@ -7,6 +7,16 @@
     <meta name="theme-color" content="#0f5c58" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>SafeZone</title>
+    <script>
+      // Apply the saved (or device) colour theme before the page paints, so it never flashes the wrong one.
+      (function () {
+        try {
+          var t = localStorage.getItem('sz-theme');
+          if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

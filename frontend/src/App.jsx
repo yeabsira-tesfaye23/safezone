@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
 import Layout from './components/Layout.jsx';
+import { ThemeToggle } from './components/ui.jsx';
 import Account from './pages/Account.jsx';
 import Admin from './pages/Admin.jsx';
 import AlertDetail from './pages/AlertDetail.jsx';
@@ -37,6 +38,8 @@ export default function App() {
   if (loading) return <p role="status" className="center" style={{ marginTop: '3rem' }}>Loading SafeZone…</p>;
   if (!user) {
     return (
+      <>
+      <div className="theme-fixed"><ThemeToggle /></div>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -46,6 +49,7 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyNotice />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </>
     );
   }
   return (
