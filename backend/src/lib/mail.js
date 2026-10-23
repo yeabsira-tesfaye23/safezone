@@ -28,7 +28,7 @@ export async function sendMail({ to, subject, text }) {
         to: [{ email: to }],
         subject,
         textContent: text,
-        htmlContent: `<p style="font-family:sans-serif;line-height:1.5">${escapeHtml(text).replace(/\n/g, '<br>').replace(/(https?:\/\/\S+)/g, '<a href="$1">$1</a>')}</p>`,
+        htmlContent: `<p style="font-family:sans-serif;line-height:1.5">${escapeHtml(text).replace(/\n/g, '<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>')}</p>`,
       }),
       signal: AbortSignal.timeout(10000),
     });
