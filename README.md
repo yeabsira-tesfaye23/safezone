@@ -7,7 +7,33 @@ A privacy-preserving, geofencing-based safety web app for minors, their guardian
 > confirm a crime**, and it never labels anyone as an offender. It does not replace local emergency services.
 > This is a university project: use **test accounts and simulated locations only**.
 
-## Quick start (no database or Docker to install)
+## Live deployment
+
+SafeZone is deployed and running online: **https://safezone-j80l.onrender.com**
+
+| Part | Where it runs |
+|---|---|
+| Web app and API (one Node.js service serving the built React app) | Render, free web service (Frankfurt) |
+| Database | Neon, free serverless PostgreSQL |
+| Transactional email (account confirmation, password reset) | Brevo HTTPS API |
+| Source code | This GitHub repository; Render redeploys when `main` is updated |
+
+Notes for anyone trying the live site:
+- The free Render service sleeps when idle, so the first request after a pause can take about a minute.
+- New accounts must confirm their email address through a link before they can sign in. Passwords need at least 8 characters,
+  including an upper-case letter, a lower-case letter, a number and a special character.
+- Use **test data and simulated locations only**. SafeZone is a student project and has not been evaluated with real users.
+- The browser must allow location access for SOS to attach a position, and the page must be open for zone checking to work.
+- Use a separate browser (or a private window) for each account. The sign-in cookie is shared by all tabs of one browser,
+  so signing in as a second user in the same browser replaces the first.
+
+### Settings used in production (names only; keep the values secret)
+
+`DATABASE_URL`, `JWT_SECRET`, `REPORT_ENCRYPTION_KEY`, `COOKIE_SECURE=true`, `NODE_ENV=production`, `FRONTEND_ORIGIN` (the live URL above),
+`REQUIRE_EMAIL_VERIFICATION`, `BREVO_API_KEY`, `MAIL_FROM`, `MAIL_FROM_NAME`. See `backend/.env.example` for what each one does.
+Never commit real values to the repository.
+
+## Run it on your own computer (no database or Docker to install)
 
 Requirement: **Node.js 20 or newer** (https://nodejs.org, LTS).
 
@@ -42,7 +68,7 @@ The API then serves the built React app. Put it behind HTTPS (a reverse proxy). 
 ## Tests
 
 ```bash
-npm run test          # 34 API tests (run on a PostgreSQL `safezone_test` database; they also pass on the built-in database) + 6 screen-render tests
+npm run test          # 37 API tests (run on a PostgreSQL `safezone_test` database; they also pass on the built-in database) + 6 screen-render tests
 ```
 Create the test database once: `createdb -O safezone safezone_test`. Tests use their own database and wipe it.
 
@@ -69,7 +95,7 @@ Create the test database once: `createdb -O safezone safezone_test`. Tests use t
 - **Notifications are in-app only.** Firebase push is not wired up (it needs a Firebase project and a mobile/service-worker client). The app polls every 6 s and can show a browser pop-up if the tab is open. A closed browser tab receives nothing.
 - **A browser cannot check geofences in the background** the way a native app can. Zone checking works while the page is open. For true background geofencing, build the Flutter client from the design document against this same API.
 - Position data from a browser can be spoofed; the server trusts the child's device for "inside/outside". Test mode is only a simulator for demos.
-- Password-reset emails are printed to the server console (no mail provider configured).
+- Email (confirmation and password reset) is sent through Brevo when `BREVO_API_KEY` and `MAIL_FROM` are set. Without them, the message is printed to the server console, which is what happens when you run SafeZone locally.
 - Guardian verification is optional (`REQUIRE_GUARDIAN_VERIFICATION=true` makes admins verify guardians first). Real identity checks are out of scope.
 - Retention periods are proposals, not legal advice. Confirm legal rules for minors' data in your country.
 - No test results from real users exist. Do not report usability or battery numbers you did not measure.
